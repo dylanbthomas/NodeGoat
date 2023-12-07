@@ -50,5 +50,5 @@ jobs:
           FOD_PASSWORD: ${{secrets.FOD_PAT}}
           FOD_RELEASE: NodeGoat_github:fortify_integration
           EXTRA_FOD_LOGIN_OPTS: --socket-timeout=60s
-          #EXTRA_FOD_SAST_SCAN_OPTS: -oss
+          EXTRA_PACKAGE_OPTS: -oss
           DO_EXPORT: true
