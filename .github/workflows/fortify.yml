@@ -1,0 +1,53 @@
+################################################################################################################################################
+# Fortify lets you build secure software fast with an appsec platform that automates testing throughout the DevSecOps pipeline. Fortify static,#
+# dynamic, interactive, and runtime security testing is available on premises or as a service. To learn more about Fortify, start a free trial #
+# or contact our sales team, visit microfocus.com/appsecurity.                                                                                 #
+#                                                                                                                                              #
+# Use this workflow template as a basis for integrating Fortify on Demand Static Application Security Testing(SAST) into your GitHub workflows.#
+# This template demonstrates the steps to prepare the code+dependencies, initiate a scan, download results once complete and import into       #
+# GitHub Security Code Scanning Alerts. Existing customers should review inputs and environment variables below to configure scanning against  #
+# an existing application in your Fortify on Demand tenant. Additional information is available in the comments throughout the workflow, the   #
+# documentation for the Fortify actions used, and the Fortify on Demand / ScanCentral Client product documentation. If you need additional     #
+# assistance with configuration, feel free to create a help ticket in the Fortify on Demand portal.                                            #
+################################################################################################################################################
+
+name: Fortify on Demand Scan
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  
+jobs:
+  FoD-SAST-Scan:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      # Check out source code
+      - name: Check Out Source Code
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: nnpm ci --omit-dev
+      
+      - name: Run Fortify Scan
+        uses: fortify/github-action@v1
+        with:
+          sast-scan: true
+        env:
+          FOD_URL: "https://ams.fortify.com/"
+          FOD_TENANT: ${{secrets.FOD_TENANT}}
+          FOD_USER: ${{secrets.FOD_USER}}
+          FOD_PASSWORD: ${{secrets.FOD_PAT}}
+          FOD_RELEASE: NodeGoat_github:fortify_integration
+          EXTRA_FOD_LOGIN_OPTS: --socket-timeout=60s
+          EXTRA_PACKAGE_OPTS: -oss
+          DO_EXPORT: true
